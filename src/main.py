@@ -10,8 +10,8 @@ from htmlnode import HTMLNode
 
 def main():
 	basepath = sys.argv[0]
-	copy_files("static", "public")
-	generate_pages_recursive("content", "template.html", "public", basepath)
+	copy_files("static", "docs")
+	generate_pages_recursive("content", "template.html", "docs", basepath)
 
 
 def copy_files(src_dir, dest_dir):
