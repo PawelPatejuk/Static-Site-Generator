@@ -1,6 +1,7 @@
 import os
 import shutil
 from pathlib import Path
+import sys
 
 from textnode import TextNode
 from markdown import markdown_to_html_node
@@ -8,8 +9,9 @@ from htmlnode import HTMLNode
 
 
 def main():
+	basepath = sys.argv[0]
 	copy_files("static", "public")
-	generate_pages_recursive("content", "template.html", "public")
+	generate_pages_recursive("content", "template.html", "public", basepath)
 
 
 def copy_files(src_dir, dest_dir):
@@ -29,9 +31,6 @@ def copy_files(src_dir, dest_dir):
 
 
 def extract_title(markdown):
-#	if len(markdown.strip()) == 0:
-#		return "heeey"
-
 	for line in markdown.split("\n"):
 		if line.startswith("# "):
 			return line[1:].strip()
@@ -40,7 +39,7 @@ def extract_title(markdown):
 	raise Exception("heading not found")
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path):
 	print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
 	f = open(from_path, "r")
@@ -56,7 +55,7 @@ def generate_page(from_path, template_path, dest_path):
 	node = markdown_to_html_node(from_content)
 	html = node.to_html()
 
-	new_content = template_content.replace("{{ Title }}", title).replace("{{ Content }}", html)
+	new_content = template_content.replace("{{ Title }}", title).replace("{{ Content }}", html).replace('href="/', f'href="{base_path}').replace('src="/', f'src="{base_path}')
 
 	f = open(dest_path, "w")
 	f.write(new_content)
@@ -64,7 +63,7 @@ def generate_page(from_path, template_path, dest_path):
 
 	print("generate_page: Done\n")
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, base_path):
 	if not os.path.exists(dest_dir_path) and not os.path.isfile(dest_dir_path):
 		os.mkdir(dest_dir_path)
 
@@ -77,11 +76,11 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
 		if os.path.isfile(src_item) and src_item.endswith(".md"):
 			print(f"generated page: {src_item}")
 			dest_item = dest_item.replace(".md", ".html")
-			generate_page(src_item, template_path, dest_item)
+			generate_page(src_item, template_path, dest_item, base_path)
 
 		elif os.path.isdir(src_item):
 			print(f"recursive page: {src_item}")
-			generate_pages_recursive(src_item, template_path, dest_item)
+			generate_pages_recursive(src_item, template_path, dest_item, base_path)
 
 	print("generate_pages_recursive: Done\n")
 
