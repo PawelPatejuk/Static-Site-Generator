@@ -9,7 +9,9 @@ from htmlnode import HTMLNode
 
 
 def main():
-	basepath = sys.argv[0]
+	basepath = "/"
+	if len(sys.argv) > 1:
+		basepath = sys.argv[1]
 	copy_files("static", "docs")
 	generate_pages_recursive("content", "template.html", "docs", basepath)
 
